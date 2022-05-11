@@ -7,7 +7,7 @@
 
 ## Context and Problem Statement
 
-We have many decisions to make when building the treetracker platform, and we will use Architectural Design Recores (ADRs) to make more and more of these decisions. (https://adr.github.io/madr/)  ADRs could be organized in a few different ways - should all decisions to be tracked in one central ADR repository, or should they be split up by teams or project areas?  ADRs are assumed to be stored in a github repository or several repositories.
+We have many decisions to make when building the treetracker platform, and we will use Architectural Decision Records (ADRs) to make more and more of these decisions. (https://adr.github.io/madr/)  ADRs could be organized in a few different ways - should all decisions to be tracked in one central ADR repository, or should they be split up by teams or project areas?  ADRs are assumed to be stored in a github repository or several repositories.
 
 ## Decision Drivers <!-- optional -->
 
