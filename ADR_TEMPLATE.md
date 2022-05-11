@@ -2,7 +2,8 @@
 
 * Status: proposed 
 <!-- {proposed | rejected | accepted | deprecated | … | superseded by [ADR-0005](0005-example.md)} --> <!-- optional -->
-* Deciders: {list everyone involved in the decision using github handle} <!-- optional -->
+* Deciders: {list everyone involved in the decision using github handle}
+<!-- Find deciders here: https://github.com/orgs/Greenstand/people  -->
 * Date: {YYYY-MM-DD when the decision was last updated} <!-- optional -->
 
 Technical Story: {description | ticket/issue URL} <!-- optional -->
