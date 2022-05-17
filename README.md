@@ -7,7 +7,7 @@ More information on ADRs and the base template we use can be found here: https:/
 
 ## Reviewing ADRs
 
-* ADRs open for review are available as pull requests.
+* ADRs open for review are available as [pull requests](https://github.com/Greenstand/treetracker-decisions/pulls).
 * Each ADR exists as a markdown file.
 * To review an ADR, first navigate through the PR to the markdown file and read it.
 * Then begin a PR review and add your comments or suggeseted additions.
