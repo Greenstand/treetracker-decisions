@@ -1,6 +1,6 @@
 # Selecting the next steps to take to improve capture matching capabilties
 
-* Status: proposed 
+* Status: proposed
 * Deciders: @ZavenArra @DavidEzraJay Cam Webb, @Elforama {list everyone involved in the decision using github handle} <!-- optional -->
 * Date: 2022-05-11
 
@@ -28,7 +28,7 @@ We have implemented a basic manual capturing tool that allows admin users to vis
 4. Research approaches to image analysis that can produce a similarity metric to improve selection of candidates for location based matching of captures.
 5. Attempt to train models using machine learning based on existing database of capture images to identify repeat captures.
 6. Incorporate assigned species information during capture matching.
-
+7. Create curated training sets of matched trees for to support training of machine learning based models.
 <!--
 ## Decision Outcome
 
@@ -53,7 +53,7 @@ Currently, images captured on the mobile application do not have specific criter
 
 Constraints can be implemented on the mobile side to ameliorate this situation.  For instance, camera rotation around the x axis could be constrained to 0, 45, and 90 degrees.  Additionally, compass bearing could be constrained such that captured photos are always north facing.  Implementing a constraint on focal distance is also possible, as has been identified in other apps.  
 
-* Good, because the images captured will have more constitant parameters. 
+* Good, because the images captured will have more constitant parameters.
 * Good, because this only affect the mobile application and does not require data research or algorithm development.
 * Bad, because the mobile application will become more complex for our low technical literacy users, and we will have to invest careful UX/UI development time to make these features easily usable.
 
@@ -61,7 +61,7 @@ Constraints can be implemented on the mobile side to ameliorate this situation. 
 
 Preliminary research has shown that GPS measurements between trees, and along the path of tree trackers traveling between trees, have errors against true position that are highly autocorrelated.  This means that while the absolute position of a give measurement can be 3-10m off using L2 GPS technology, the direction of travel between measurements is relatively stable across site visits.  This presents opportunities for leveraging this similarity to identify captures in the vicinity of a capture from a previous site visit that are more likely to be repeat visits to the same tree, which can be used to present more likely candidates during the manual matching process.
 
-* Good, because this does not affect the mobile users 
+* Good, because this does not affect the mobile users
 * Good, because this feature uses data we are already collecting
 * Good, because some preliminary research has already been done (@ZavenArra) that shows potential for this solution to work.
 * Bad, because this feature requires advanced skills in GIS analysis and algorithm development.
@@ -101,7 +101,13 @@ Treetracker intends to assign species information to all incoming captures as pa
 * Bad, because species information is currenly only available in a subset of projects.
 * Bad, because not all projets plant multiple species at the same site.
 
+### 7. Train models using machine learning based on a curated set of manually matched captures.
 
+This data set can be created using the manual capture matching tool and specific sets of trees. Additional makers may be added to images of trees such as colored sticks or numbered tags to help in this process.
+
+* Good, because this is a set to work off of and test models against
+* Bad, because it is a lot of extra work and expensive to implement on the ground.
+* Bad, because it is time consuming to create accurate matching set
 
 ## Links <!-- optional -->
 
