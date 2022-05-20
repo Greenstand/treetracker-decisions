@@ -61,9 +61,3 @@ Talk with existing team leads and establish preferences for onboarding needs and
 * Bad, because volunteers do not get immedaite access to the community
 
 
-<!--
-## Links <!-- optional -->
-
-* {Link type} {Link to ADR} <!-- example: Refined by [ADR-0005](0005-example.md) -->
-* … <!-- numbers of links can vary -->
--->
