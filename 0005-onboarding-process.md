@@ -59,5 +59,5 @@ Talk with existing team leads and establish preferences for onboarding needs and
 * Bad, because more work and coordination is required
 * Bad, because the website may have to be updated from time to time
 * Bad, because volunteers do not get immedaite access to the community
-
+* Bad, because the potential volunteers might not be able to choose the right team without context. 
 
