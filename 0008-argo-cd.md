@@ -6,18 +6,18 @@
 
 ## Context and Problem Statement
 
-Currently at Greenstand, Github is used as both a CI and CD system. Github is not designed to be a CD system. We store Kubernetes configurations as secrets within Github to be able to deploy to our environments so this creates a tight coupling between Github and our Kubernetes clusters. It is also very difficult to determine which version of an application is deployed in each of our environments without looking at the source code. It is very cumbersome for developers and operations to deploy, debug, and maintain deployments with the current setup in Github.
+Currently at Greenstand, Github is used as both a CI and CD system. Github is not designed to be a CD system. We store Kubernetes configurations as secrets within Github and use Github workflows to deploy to our environments so this creates a tight coupling between Github and our Kubernetes clusters. It is also very difficult to determine which version of an application is deployed in each of our environments without looking at the source code. It is very cumbersome for developers and operations to deploy, debug, and maintain deployments with the current setup in Github.
 
 ## Decision Drivers
 
 * Github is a source control system with CI capabilities, not designed for CD.
 * Decouple Github from our Kubernetes clusters.
-* Github does not provide visibility on the applications (health, deployment statuses) deployed in our Kubernetes clusters.
+* Github does not provide visibility on the applications (health, deployment statuses, version currently deployed) deployed in our Kubernetes clusters.
 * Follow more of a GitOps style with ArgoCD
 
 ## Considered Options
 
-* Sticking with Github workflows since it is fully functional and we can deploy to production easily
+* Sticking with Github workflows since it is fully functional and we can deploy to our environments easily
 * ArgoCD
 
 ## Decision Outcome
