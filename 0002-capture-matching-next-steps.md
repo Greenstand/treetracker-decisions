@@ -29,6 +29,7 @@ We have implemented a basic manual capturing tool that allows admin users to vis
 5. Attempt to train models using machine learning based on existing database of capture images to identify repeat captures.
 6. Incorporate assigned species information during capture matching.
 7. Create curated training sets of matched trees for to support training of machine learning based models.
+8. Duplicate detection mode
 <!--
 ## Decision Outcome
 
@@ -108,6 +109,14 @@ This data set can be created using the manual capture matching tool and specific
 * Good, because this is a set to work off of and test models against
 * Bad, because it is a lot of extra work and expensive to implement on the ground.
 * Bad, because it is time consuming to create accurate matching set
+
+### 8. Duplicate detection mode
+
+Same algorythm that is used to detect recaptures is applied on a shorter time span (smaller than 7 days) to detect possible fraud
+
+* Good, it is really needed and requested by several organizations
+* Good, improves data quality and adds a vital tool to the dashboard 
+* Bad, because it is time consuming to operate ?
 
 ## Links <!-- optional -->
 
