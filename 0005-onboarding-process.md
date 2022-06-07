@@ -11,7 +11,8 @@ Greenstand sources engineering and operations volunteers from the public, and cu
 
 ## Decision Drivers <!-- optional -->
 
-* Ease of implementation
+* Ease of initial implementation
+* Ease of long term maintenance
 * Availability of project context for new volunteers
 * Coordination with leadership styles of current team leads
 * 
