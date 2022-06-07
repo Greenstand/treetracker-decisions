@@ -1,4 +1,4 @@
-# Provisions for the use of single sign on when accessing treetracker web applications
+# Provisions for the use of identity brokering and social login when accessing treetracker web applications
 
 * Status: proposed 
 <!-- {proposed | rejected | accepted | deprecated | … | superseded by [ADR-0005](0005-example.md)} --> <!-- optional -->
@@ -12,7 +12,7 @@ Technical Story:
 
 ## Context and Problem Statement
 
-Keycloak is being implemented to replace the current auth system used by the admin panel, and to provide a more generalized auth system for web apps and microservices.  Keycloak offers single sign on (SSO) integrations for accounts from other providers, most notably Google and Facebook.  We should decide which, if any, SSO providers to allow our users to use when accessing our systems.
+Keycloak is being implemented to replace the current auth system used by the admin panel, and to provide a more generalized auth system for web apps and microservices.  Keycloak offers identity brokering and social login integrations for accounts from other providers, most notably Google and Facebook.  We should decide which, if any, social login providers to allow our users to use when accessing our systems.
 
 ## Decision Drivers <!-- optional -->
 
@@ -23,9 +23,9 @@ Keycloak is being implemented to replace the current auth system used by the adm
 
 ## Considered Options
 
-1. Do not implement SSO
-2. Implement SSO for all providers supported by Keycloak
-3. Implement SSO only for providers that are deemed philosophically aligned with values shared by Greenstand engineers.
+1. Do not implement social login
+2. Implement social login for all providers supported by Keycloak
+3. Implement social login only for providers that are deemed philosophically aligned with values shared by Greenstand engineers.
 
 <!--
 ## Decision Outcome
@@ -72,7 +72,3 @@ Chosen option: "{option 1}", because {justification. e.g., only option, which me
 * Bad, because {argument c}
 * … <!-- numbers of pros and cons can vary -->
 
-## Links <!-- optional -->
-
-* {Link type} {Link to ADR} <!-- example: Refined by [ADR-0005](0005-example.md) -->
-* … <!-- numbers of links can vary -->
