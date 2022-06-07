@@ -49,28 +49,29 @@ Chosen option: "{option 1}", because {justification. e.g., only option, which me
 
 Require all users to sign up and sign in to Greenstand services with a fresh username and password.
 
-{example | description | pointer to more information | …} <!-- optional -->
+* Good, because we have a clean and simple login interface.
+* Good, because we don't risk association with other platforms with spurious ethical practices.
+* Bad, because the sign up and sign in process is more cumbersome for users.
+* Bad, because all users have to remember (or store) one more set of credentials.
 
-* Good, because {argument a}
-* Good, because {argument b}
-* Bad, because {argument c}
-* … <!-- numbers of pros and cons can vary -->
 
 ### 2. Implement social login for all providers supported by Keycloak
 
-{example | description | pointer to more information | …} <!-- optional -->
+From https://www.keycloak.org/docs/latest/server_admin/
 
-* Good, because {argument a}
-* Good, because {argument b}
-* Bad, because {argument c}
-* … <!-- numbers of pros and cons can vary -->
+With Keycloak, users can log in to your application using a social network account. Supported providers include Twitter, Facebook, Google, LinkedIn, Instagram, Microsoft, PayPal, Openshift v3, GitHub, GitLab, Bitbucket, and Stack Overflow.
+
+* Good, because most users will have an account with at least one of these providers.
+* Good, because users can sign up and log in quickly and easily.
+* Good, because users will make fewer mistakes and will require less admin support.
+* Bad, because the list of supported providers is very long.
+* Bad, because Greenstand may be seen as endorsing the providers listed, some of whose values do not necessarily align with ours.
 
 ### 3. Implement social login only for providers that are deemed philosophically aligned with values shared by Greenstand engineers.
 
-{example | description | pointer to more information | …} <!-- optional -->
+Which providers should be included?  How do we make the decision to include certain providers, but not others?
 
-* Good, because {argument a}
-* Good, because {argument b}
-* Bad, because {argument c}
-* … <!-- numbers of pros and cons can vary -->
+* Good, because users can sign up and log in quickly and easily.
+* Good, because users will make fewer mistakes and will require less admin support.
+* Bad, because we may eliminate a lot of the benefits of social login if we exclude certain providers.
 
