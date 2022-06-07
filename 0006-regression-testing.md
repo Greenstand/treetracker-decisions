@@ -9,7 +9,7 @@ Technical Story: {description | ticket/issue URL} <!-- optional -->
 
 ## Context and Problem Statement
 
-Manual regression tests are needed for some frontend features that do not have automated testing yet.  Regression tests need to be defined in a standard format, and a process is needed for systematically performing these tests for the QC team.
+Manual regression tests are needed for some frontend features that do not have automated testing yet, in particular integration tests.  Regression tests need to be defined in a standard format, and a process is needed for systematically performing these tests for the QC team.
 
 ## Decision Drivers <!-- optional -->
 
