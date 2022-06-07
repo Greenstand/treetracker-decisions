@@ -1,7 +1,7 @@
 # Selecting the next steps to take to improve capture matching capabilties
 
 * Status: proposed
-* Deciders: @ZavenArra @DavidEzraJay Cam Webb, @Elforama {list everyone involved in the decision using github handle} <!-- optional -->
+* Deciders: @ZavenArra @DavidEzraJay @CamWebb, @Elforama {list everyone involved in the decision using github handle} <!-- optional -->
 * Date: 2022-05-11
 
 Technical Story:
