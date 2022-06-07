@@ -45,7 +45,9 @@ Chosen option: "{option 1}", because {justification. e.g., only option, which me
 
 ## Pros and Cons of the Options <!-- optional -->
 
-### 1. Do no implement SSO
+### 1. Do no implement social login
+
+Require all users to sign up and sign in to Greenstand services with a fresh username and password.
 
 {example | description | pointer to more information | …} <!-- optional -->
 
@@ -54,7 +56,7 @@ Chosen option: "{option 1}", because {justification. e.g., only option, which me
 * Bad, because {argument c}
 * … <!-- numbers of pros and cons can vary -->
 
-### 2. Implement SSO for all providers supported by Keycloak
+### 2. Implement social login for all providers supported by Keycloak
 
 {example | description | pointer to more information | …} <!-- optional -->
 
@@ -63,7 +65,7 @@ Chosen option: "{option 1}", because {justification. e.g., only option, which me
 * Bad, because {argument c}
 * … <!-- numbers of pros and cons can vary -->
 
-### 3. Implement SSO only for providers that are deemed philosophically aligned with values shared by Greenstand engineers.
+### 3. Implement social login only for providers that are deemed philosophically aligned with values shared by Greenstand engineers.
 
 {example | description | pointer to more information | …} <!-- optional -->
 
