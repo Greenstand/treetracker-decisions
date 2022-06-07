@@ -41,8 +41,6 @@ Chosen option: "{option 1}", because {justification. e.g., only option, which me
 
 ###  Using Typescript in the backend
 
-{example | description | pointer to more information | …} <!-- optional -->
-
 * Good, because of a better code maintainability.
 
   With Typescript, we can navigate the code pretty much easier, to find definition of function/class/variables/files etc. If we use VSCode, we can check the definition by hovering the mouse over the variable, auto-completion when coding, auto-import when coding, auto-fix when warn/error detected. Basically, to jump between files is a big cumbersome using vanilla Javascript.
@@ -71,11 +69,7 @@ Chosen option: "{option 1}", because {justification. e.g., only option, which me
 
   So I suggest we just use TS in a simple way, and if we set up the codebase with Typescript correctly, then a newcoming developer shouldn't need to take a long time to learn Typescript to start coding. 
 
-### {option 2}
+### Using vanilla Javascript in the backend.
 
-{example | description | pointer to more information | …} <!-- optional -->
-
-* Good, because {argument a}
-* Good, because {argument b}
-* Bad, because {argument c}
-* … <!-- numbers of pros and cons can vary -->
+* Good, because of less learning curve
+* Bad, because complex domain logic is poorly expressed
