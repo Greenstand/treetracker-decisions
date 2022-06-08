@@ -6,7 +6,9 @@
 <!-- Find deciders here: https://github.com/orgs/Greenstand/people  -->
 * Date: 2022-06-07
 
-Technical Story: https://github.com/Greenstand/treetracker-herbarium-api/issues/1 
+Technical Story: 
+* https://github.com/Greenstand/treetracker-herbarium-api/issues/1 
+* https://www.figma.com/file/RrG8fahXei5SDY6AYjYYnn/Digital-Herbarium---Species%2FCommon-Names?node-id=0%3A1
 
 ## Context and Problem Statement
 
