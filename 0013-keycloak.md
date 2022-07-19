@@ -36,10 +36,13 @@ Considerations:
   (To Tuan-Anh Nguyen), for some details, the Ambassador has built-in support for the oAuth2 , by the Ambassador Filter & Filter Policy, as you told me, that's an easier solution, but unfortunately, the Ambassador Filter Policy can not support bringing the http method to the Keycloak side, so we can not implement the resource based authentication, the Ambassador solution seems do not support a fine-grained auth system.
   
   And I also find the Ambassador didn't talked too much about how to cache the authentication result or similar mechanism, so if we implement it by ourselves, we can control, optimize this part more freely.
+  
+  In this design, we plan to use the `external-filter` to implement this, check the document below.
 
   Here are some related resources:
   https://stackoverflow.com/questions/72780645/how-to-reflect-http-method-to-keycloak-resource-when-using-ambassador-filter/72790483#72790483
   https://www.getambassador.io/docs/edge-stack/latest/topics/using/filters/oauth2/
+  https://www.getambassador.io/docs/edge-stack/latest/topics/using/filters/external/
 
 * All the client can get the user profile, information, and permission list from Keycloak, to use it to display user info and decide the visible menu items.
 
