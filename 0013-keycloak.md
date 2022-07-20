@@ -2,7 +2,7 @@
 
 * Status: proposed 
 <!-- {proposed | rejected | accepted | deprecated | … | superseded by [ADR-0005](0005-example.md)} --> <!-- optional -->
-* Deciders: Nick Charlton, Tuan-Anh Nguyen, Dadiorchen, Zaven, Daniel, Gwynn Dandridge-Perry
+* Deciders: Nick Charlton, Tuan-Anh Nguyen, Emmanue, Dadiorchen, Zaven, Daniel, Gwynn Dandridge-Perry
 <!-- Find deciders here: https://github.com/orgs/Greenstand/people  -->
 * Date: Mon Jul 18 11:05:04 CST 2022
 
