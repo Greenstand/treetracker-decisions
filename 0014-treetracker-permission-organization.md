@@ -8,7 +8,7 @@
 
 Technical Story:  <!-- optional -->
 
-The detail is here: https://greenstand.gitbook.io/auth-system/treetracker-permission-organization
+The detail is here: https://greenstand.gitbook.io/auth-system/treetracker-permission-system
 
 
 
