@@ -1,4 +1,4 @@
-# Intern Like system
+# Internal Like system
 
 * Status: proposed 
 <!-- {proposed | rejected | accepted | deprecated | … | superseded by [ADR-0005](0005-example.md)} --> <!-- optional -->
@@ -20,14 +20,14 @@ Another issue is that we are not able to create a custom Like button in the Gree
 
 ## Considered Options
 
-* Option #1 - Intern Like system, to save likes on trees/entities directly
-* Option #2 - Your suggestions are welcome
+* Option #1 - Internal Like system, to save likes on trees/entities directly
+* Option #2 – Internal Like system linked with Keycloak user authentication system
 
 ## Decision Outcome
 
 <!-- Chosen option: "{option 1}", because {justification. e.g., only option, which meets k.o. criterion decision driver | which resolves force {force} | … | comes out best (see below)}. -->
 
-To be decided.
+Option #2 because this way we can authenticate users and link them to their likes which resolves the bad UX issue of option #1. It also resolves the potential risk of cheating.
 
 ### Positive Consequences <!-- optional -->
 
@@ -40,6 +40,7 @@ Option #1
 
 Option #1
 * Risk of "cheating", not being able to identify the user
+* Bad UX, user who liked a tree returns back to see no record of them liking the tree
 
 ## Pros and Cons of the Options <!-- optional -->
 
