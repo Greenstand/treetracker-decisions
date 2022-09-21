@@ -1,6 +1,6 @@
 # Internal Like system
 
-* Status: proposed 
+* Status: accepted 
 <!-- {proposed | rejected | accepted | deprecated | … | superseded by [ADR-0005](0005-example.md)} --> <!-- optional -->
 * Input: Welcome from anyone!
 * Deciders: {list everyone involved in the decision using github handle}
