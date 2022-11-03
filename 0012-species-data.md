@@ -19,7 +19,7 @@ identify and differentiate from similar species using low-resolution
 photos.  For many species the scientific taxonomy itself can be
 complex and unresolved.  Given these complexities it is necessary to
 use a two-stage system: matching images to morphotypes first, then
-identifying morphotypes to scientific names, is possible.
+identifying morphotypes to scientific names, if possible.
 
 **Species in the admin panel**: The current Treetracker system evolved
 opportunistically. At first anyone could add a species name in the
@@ -80,10 +80,10 @@ local-to-global mapping within the database._
     mappings between the localname (= morphotype) and a vetted list of
     global names (these may also just be morphotype codes in the case
     where the final scientific name has not been settled). E.g.,
-    `"Mangifera indica"@orgX` is mapped to global `MANGINDI`. Once
+    `"mangga"@orgX` is mapped to global `MANGINDI`. Once
     this vetting has happened, individual trees can are then linked
     out to the global knowledge base. E.g., wood densities can be
-    imported and carbon calculations could be made.
+    imported and carbon calculations could thus be made.
 
 ### Modified schema
 
@@ -95,8 +95,9 @@ id    <-+   id              +-> id        <-+   id              +-> id
         +-- tree_id*        |   name        +-- localname_id*   |   name
             localname_id* --+   sci_name%       species_id*   --+
             user_id*            org_id*         user_id*
-            timestamp           user_id*        timestamp
-                                timestamp
+            timestamp           user_id*        confidence
+                                timestamp       notes
+                                                timestamp
 ```
 
 Notes: 
@@ -110,10 +111,10 @@ Notes:
    `tree` and `capture` tables. 
  * In the `localname` table: `UNIQUE KEY (name, org_id)`
  * In the `det` table, (`tree_id`, `localname_id`, `user_id`) is not
-   unique, allowing a user to update their determination, but the
+   unique, allowing a user to update (and revert) their determination, but the
    latest det should be used as the current det for that plant.
  * In the `taxonmap` table, (`species_id`, `localname_id`, `user_id`)
-   is not unique, allowing a species admin to update their mapping
+   is not unique, allowing a species admin to update (and revert) their mapping
    decision, but the latest species name should be used as the current
    species name for that localname.
 
@@ -127,10 +128,13 @@ link. The UI element could operate thus:
  * See a table with a list of localnames for that organization in the
    left column (a hyperlink for each name might open a new browser tab
    showing some captures that have been determined to that local name).
- * In the right column, next to each localname is a dropdown menu (or
+ * In the next column, next to each localname is a dropdown menu (or
    incremental-lookup) allowing the admin user to select a global
    species for each localname. One or many localnames can be mapped at
    one time.
+ * For each decision, two further columns offer a chance to assign i) a
+   confidence measure to the mapping (dropdown menu: ‘high’, ‘medium’,
+   ‘low’), and a ii) notes about the mapping.
  * “Save” and write new entries to `taxonmap` table.
 
 [1]: https://github.com/Greenstand/Tree_Species
