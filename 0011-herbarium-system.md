@@ -2,7 +2,7 @@
 
 * Status: proposed 
 <!-- {proposed | rejected | accepted | deprecated | … | superseded by [ADR-0005](0005-example.md)} --> <!-- optional -->
-* Deciders: @ZavenArra @CammWeb
+* Deciders: @ZavenArra @CamWebb
 <!-- Find deciders here: https://github.com/orgs/Greenstand/people  -->
 * Date: 2022-06-07
 
