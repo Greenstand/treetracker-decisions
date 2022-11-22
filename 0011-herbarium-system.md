@@ -23,7 +23,7 @@ Tree planting and tracking organizations use various, localy relevant common nam
 
 ## Considered Options
 
-1. Implement an herbarium microservice to provide organization specific common names, while aggregating globally relevant species information.
+1. Implement an herbarium microservice to provide organization specific common names
 2. Alternative option?
 
 <!--
