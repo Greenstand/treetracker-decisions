@@ -2,7 +2,7 @@
 
 * Status: proposed 
 <!-- {proposed | rejected | accepted | deprecated | … | superseded by [ADR-0005](0005-example.md)} --> <!-- optional -->
-* Deciders: @nmcharlton @emmanue @dadiorchen @ZavenArra
+* Deciders: @nmcharlton @emmanue @dadiorchen @ZavenArra @Kpoke @RubenSmn
 <!-- Find deciders here: https://github.com/orgs/Greenstand/people  -->
 * Date: Wed Feb  1 11:23:50 CST 2023
 
