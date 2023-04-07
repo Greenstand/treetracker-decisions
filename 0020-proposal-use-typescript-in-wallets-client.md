@@ -14,31 +14,20 @@ Using TypeScript (and strong-typing) can bring to a project lots of benefits.
 
 ## Decision Drivers <!-- optional -->
 
-- {Type Safety: catching errors on compilation stage instead of runtime}
-- {Better code maintainability over the time}
-- {No need to rewrite the code when the project will grow up}
-- {TypeScript is already used on the Backend - Wallet API. Unified style will be easier for Full-Stack developers}
+- Type Safety: catching errors on compilation stage instead of runtime
+- Better code maintainability over the time
+- No need to rewrite the code when the project will grow up
+- TypeScript is already used on the Backend - Wallet API. Unified style will be easier for Full-Stack developers
 
 ## Considered Options
 
 - **Option #1** Fully adopt TypeScript
 - **Option #2** Use basic features of TypeScript like types, interfaces, ect
 - **Option #3** Use plain JavaScript
-- … <!-- numbers of options can vary -->
 
 ## Decision Outcome
 
-Chosen option: "{option 1}", because {justification. e.g., only option, which meets k.o. criterion decision driver | which resolves force {force} | … | comes out best (see below)}.
-
-### Positive Consequences <!-- optional -->
-
-- {e.g., improvement of quality attribute satisfaction, follow-up decisions required, …}
-- …
-
-### Negative Consequences <!-- optional -->
-
-- {e.g., compromising quality attribute, follow-up decisions required, …}
-- …
+TBD
 
 ## Pros and Cons of the Options <!-- optional -->
 
@@ -67,8 +56,3 @@ Use plain JavaScript
 - Good, because it will not require people to learn TypeScript if they are not familiar with it
 - Bad, because we will not get benefits described in option 1
 - … <!-- numbers of pros and cons can vary -->
-
-## Links <!-- optional -->
-
-- {Link type} {Link to ADR} <!-- example: Refined by [ADR-0005](0005-example.md) -->
-- … <!-- numbers of links can vary -->
