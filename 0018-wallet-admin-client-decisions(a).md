@@ -1,6 +1,6 @@
 # Wallet Admin client design and integration decision 
-
-* Status: proposed 
+Solution: * **Option #1** Make this a 'free standing' wallet admin panel application with its own design and a separate repro
+* Status: accepted
 <!-- {proposed | rejected | accepted | deprecated | … | superseded by [ADR-0005](0005-example.md)} --> <!-- optional -->
 * Deciders: @OlhaD
 <!-- Find deciders here: https://github.com/orgs/Greenstand/people  -->
@@ -11,8 +11,7 @@ The end goal of the wallet admin client is to enable the flow of tokens from gro
 The token flow has several steps:
 1. Field transfer (a request from the app to mint the token into a specific wallet/send it to a specific organization)
 2. The verification of the token's attributes (takes place in the main admin panel)
-3. The transfer of the token via the Wallet API (which is done with third-party tools such as Postman, or by tools built by integrators. 
-4. This tool will use some of the same microservices as the admin panel, plus the wallet microservice
+3. The transfer of the token via the Wallet API, which is currently done with third-party tools such as Postman, or by tools built by integrators. 
 
 The Wallet Admin Client user is potentially a different set of users than the main admin client. 
 ## Links <!-- optional -->
@@ -48,7 +47,7 @@ Note: this replaces previvious thinking in that this tool will have a seperate l
 ## Decision Outcome
 
 Start developing. We have a potential team and team lead for the development of this project. 
-
+* **Option #1** Make this a 'free standing' wallet admin panel application with its own design and a separate repro
 
 ## Pros and Cons of the Options <!-- optional -->
 
