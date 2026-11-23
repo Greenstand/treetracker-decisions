@@ -1,168 +1,219 @@
-# Separate organization membership, subscription and project-based session ownership
+# Organization access, subscriptions and project-based collection
 
 * Status: proposed
-* Deciders: To be confirmed: maintainers responsible for Stakeholder, identity/admin, Android, Field Data and SaaS. This proposal records the design discussion requested by Sebastian Gaertner; it does not claim their approval.
+* Deciders: To be confirmed with the Stakeholder, identity/admin, Android, Field Data and SaaS maintainers.
 * Date: 2026-11-23
 
-Technical Story: [Admin integration #1314](https://github.com/Greenstand/treetracker-admin-client/issues/1314), [remaining NDM migration and BDD work #1316](https://github.com/Greenstand/treetracker-admin-client/issues/1316).
+Requested by Sebastian Gaertner. Related work: [admin integration #1314](https://github.com/Greenstand/treetracker-admin-client/issues/1314) and [remaining NDM work #1316](https://github.com/Greenstand/treetracker-admin-client/issues/1316).
+
+> **This is the proposed design, not a description of a completed rollout.** The tables below distinguish existing behavior from changes still needed. Free/trial allowances and several approval rules remain open.
 
 ## Context and Problem Statement
 
-Treetracker currently combines several meanings of “organization binding”: an admin-panel login requesting access, a grower collecting for an organization, a mobile invite carrying organization information, and subscription metadata linking a billing customer. These are related but distinct relationships. Treating one mutable Keycloak organization attribute or a grower's home organization as the owner of all subsequent data cannot safely represent multiple memberships or preserve historical ownership.
+“Organization binding” currently describes several different things. An admin-panel user requests access, a grower joins an organization, a QR code opens the Android app, and Stripe links a subscription to an organization. We need to connect these flows without treating them as the same relationship.
 
-The new domain model (NDM) uses Stakeholder UUIDs for organizations, project membership for fieldwork, and sessions/captures in Field Data and Treetracker. Existing clients still carry numeric organization IDs or organization strings. We need one explicit lifecycle across registration, access approval, billing, project selection and capture routing, with a compatible migration path.
+The **new domain model (NDM)** identifies an organization through its **Stakeholder UUID**. Older integrations still use a numeric organization ID or an organization name. A **session** is one period of field collection; its captures must keep the organization and project they were collected for, even if the grower moves later.
 
-### Evidence and current implementation, not a completed architecture
+### Four separate questions
 
-* The original [admin binding scenario #1266](https://github.com/Greenstand/treetracker-admin-client/issues/1266) describes a registered admin-panel user requesting an organization, platform approval/rejection and subsequent Verify access.
-* The current binding controller sets the numeric Keycloak `organization_id`, grants `org`, and clears the pending attributes. It rejects another request when that login already has an organization. It does not grant `org-admin-saas` or require a subscription; organization lookup still uses the legacy repository. This is not yet an NDM membership/audit transaction.
-* The domain-admin integration recognizes `org-admin-saas` as organization administration; ordinary `org` members default to `verify_captures` unless scoped grants override it. First-administrator assignment is not a complete automatic onboarding flow.
-* The [subscription scenario #1261](https://github.com/Greenstand/treetracker-admin-client/issues/1261) describes an existing organization upgrading to premium. Paid-tier display, hosted billing and usage warnings exist in the integration; complete access/quota enforcement is not implemented. Subscription status and administrative authority must not be conflated.
-* The accepted [March 2022 session-organization bridge ADR](https://github.com/Greenstand/treetracker-field-data/blob/main/docs/adr/0001-organization-by-session-bridge.md) explicitly anticipates a grower tracking for multiple organizations. It describes a historical bridge, not proof that the present end-to-end flow is complete.
-* The existing [grower-account organization association](https://github.com/Greenstand/treetracker-api/blob/main/database/migrations/sqls/20220321204145-grower-account-organization-up.sql) supports multiple grower memberships. The project proposal adds `stakeholder.project` and `project_grower`.
-* Android's current [SessionRequest](https://github.com/Greenstand/treetracker-android/blob/master/app/src/main/java/org/greenstand/android/TreeTracker/api/models/requests/SessionRequest.kt) contains an organization string but no project UUID. The current [Field Data session POST schema](https://github.com/Greenstand/treetracker-field-data/blob/main/server/handlers/sessionHandler/schemas.js) also does not accept the proposed project input. Admin-side session project correction and a database column do not complete mobile upload support.
-* Share App forwards `org_id`/`org_name` into Android deep-link/install-referrer handling. This is an organization invitation/context hint, not proof of admin membership. Scanning the QR must not grant admin-panel access.
+| Concept | Question it answers | Proposed source |
+| --- | --- | --- |
+| Login | Who is this person? | Keycloak |
+| Membership and permissions | Which organizations can they work with, and what can they do? | Organization-scoped domain memberships |
+| Subscription | Which services and limits has the organization purchased? | Stripe, linked to the Stakeholder UUID |
+| Data ownership | Which organization and project was this session collected for? | The session's project and its owning Stakeholder organization |
+
+**Payment does not make someone an administrator. A QR code does not grant admin access. A grower's current organization does not determine ownership of historical captures.**
 
 ## Decision Drivers
 
-* Separate authentication, authorization, commercial entitlements and data ownership.
-* Support growers working for multiple organizations and projects without duplicating their identity.
-* Resolve all new domain ownership to Stakeholder UUIDs, while migrating existing clients safely.
-* Preserve session/capture ownership when people move or subscriptions change.
-* Permit offline collection with explicit, validated context and deterministic retry behavior.
-* Record real actors, time, reasons and previous values for administrative changes.
+* Let a grower work for several organizations and projects with one grower account.
+* Keep login access, permissions, billing and data ownership separate.
+* Make organization setup simple, including a usable first project.
+* Support offline collection and older app versions during migration.
+* Preserve historical ownership and record administrative corrections.
 
 ## Considered Options
 
-1. Use the single Keycloak organization attribute or grower's current organization for membership and capture ownership.
-2. Select an organization for each session, with projects optional indefinitely.
-3. Separate memberships and entitlements, and assign each new session to a validated project owned by one Stakeholder organization, with an explicit default-project and legacy-upload transition.
+| Option | Benefit | Problem |
+| --- | --- | --- |
+| 1. Use one organization attribute for everything | Smallest change to existing clients | Cannot represent several memberships safely; moving a person can change the meaning of old data |
+| 2. Assign sessions only to organizations | Supports collection for several organizations | Does not identify which project or project species list applies |
+| **3. Separate memberships and billing; assign new sessions to projects** | Explicit permissions and stable collection ownership | Requires coordinated Android and backend changes |
 
 ## Decision Outcome
 
-Proposed choice: **Option 3**. The rules below are proposed for review; this ADR is not an implementation-complete or acceptance record.
+**Proposed choice: Option 3**, with a default project and a staged migration for older clients.
 
-### 1. Identity and memberships
+### 1. Starting an organization
 
-Keycloak authenticates an admin-panel user. Domain membership records which Stakeholder organizations that user may access and the capabilities granted within each. Keycloak roles/claims may be synchronized projections; a single organization claim must not become the only authoritative multi-organization membership store.
-
-A grower account is a separate domain identity from an admin-panel login. A grower may have approved memberships in several organizations and enrollments in several projects. Being a grower, scanning a QR or paying a subscription grants no administrative privileges. A home/primary organization may remain useful for contact or reporting, but must not overwrite historical collection ownership.
-
-This ADR permits a future admin login with several approved organization memberships. Implementing the organization selector and membership checks for that case is separate from the existing single-claim binding flow.
-
-### 2. Organization onboarding and subscription
-
-An organization may register and complete setup without an active paid subscription. Record onboarding/approval state independently of subscription state. This does **not** establish free production quotas, wallet access, unlimited uploads or a trial duration: those entitlements require the policy decisions below.
-
-Subscription status controls the organization's agreed service entitlements, not who its administrators are. Stripe metadata must resolve to the canonical Stakeholder organization UUID, retaining numeric metadata only as an explicit compatibility mapping. Do not use an email address as the stable organization identifier.
-
-Cancellation, payment failure or plan changes must not delete membership, historical sessions/captures or identity login access. The precise restricted/read-only behavior and any payment-recovery grace period remain open policy decisions. The backend must enforce the agreed policy; UI warnings and `subscriber_*` roles alone are insufficient.
-
-### 3. Assigning the first and subsequent organization administrators
-
-Establish the first administrator through a platform-approved organization onboarding/ownership verification action. Record who approved it and the scope granted. Do not make every approved binding applicant an organization administrator, and do not infer administration rights from a paid plan or matching email.
-
-An authorized organization administrator may then invite/manage additional members and grant agreed capabilities such as verification, projects, species or membership management. Platform administrators retain an audited recovery path. Whether ordinary binding approvals may be delegated to organization administrators must be agreed before enabling that delegation.
-
-The present `org-admin-saas` role is a compatibility mechanism; the target authorization is membership-scoped. Billing administration may also need a distinct capability. The migration must avoid a global role accidentally granting administration in every organization a person joins.
-
-### 4. A default project
-
-Create one idempotent **General** project during approved organization setup, owned by that Stakeholder UUID. It counts toward the plan's project allowance; it is not an extra unmetered project. Its display name may be edited while its UUID remains stable.
-
-The project exists to avoid forcing a new organization to design a project structure before collecting. An organization may later choose a different default. Archiving or replacing the default requires an explicit replacement rule and must not change historical references.
-
-Default project selection and species inheritance are separate settings. Preserve the current rule that new project species selections start explicitly empty; an authorized user can allocate species or explicitly restore organization/default inheritance. Do not silently select the entire species catalogue because the project is called General.
-
-### 5. Project-based session and capture routing
-
-Each project belongs to exactly one Stakeholder organization. Once supported by the mobile/upload contract, every **new** session starts with one authorized project UUID. The backend resolves its owning organization and validates grower eligibility. It must reject conflicting client-supplied organization/project pairs rather than trusting a name, QR parameter or device preference.
+Allow an organization to register and complete setup before buying a subscription. Platform approval establishes its first administrator. Approved setup creates one **General** project so the organization does not need to design a project structure immediately.
 
 ```mermaid
-flowchart LR
-    A[Grower account] --> B[Approved organization membership]
-    B --> C[Permitted project]
-    C --> D[Start session with project UUID]
-    D --> E[Raw captures linked to session]
-    C --> F[Owning Stakeholder organization UUID]
-    E --> G[Verified captures preserve session ownership]
+flowchart TD
+    A[Register organization] --> B[Platform reviews organization and first administrator]
+    B --> C{Approved?}
+    C -->|No| D[Return for clarification or reject]
+    C -->|Yes| E[Create Stakeholder organization and approved admin membership]
+    E --> F[Create General project once]
+    F --> G[Complete organization setup]
+    G --> H[Choose a subscription when needed]
 ```
 
-Capture organization/project context is derived from the session and project relationship; this does not require copying a project column into every table. Do not route captures through the grower's current/home organization. Switching collection project starts a new session.
+The General project:
 
-An authorized correction to session allocation requires a reason, real actor, timestamp and previous/new context. Define reconciliation for already verified captures, matching events, exports and usage before applying a correction; changing only the session must not leave downstream ownership inconsistent. Moving a grower does not move historical data.
+* Belongs to the organization's Stakeholder UUID and counts toward its project quota.
+* Is created only once, including when setup is retried.
+* Can be renamed without changing its UUID.
+* Starts with an empty species selection, like other new projects. An authorized user can allocate species or explicitly choose organization/default inheritance.
 
-### 6. Android, offline behavior and QR invitations
+Creating a project does not itself authorize collection under a free plan. **Free/trial service access and quotas still need a policy decision.** Replacing or archiving the default project also needs an agreed rule; it must not change historical session references.
 
-Android receives and caches only the approved organizations/projects available to the grower, rather than a global project catalogue. Before collection it selects organization/project explicitly, or uses the sole permitted/default project with a visible indication. The session retains that selection during offline collection and uploads the project UUID through a versioned, validated contract.
+### 2. Giving people admin-panel access
 
-QR/deep links should resolve to a Stakeholder organization invitation, optionally narrowed to a project. Resolve opaque invitation tokens or validated identifiers on the server; the link itself is not an authorization credential unless a separately reviewed invitation design says so. Retain numeric `org_id` compatibility during the Android/install-referrer transition. Renaming the parameter alone does not complete the migration.
+There are two different approval paths:
 
-Upload retries must be idempotent and must not overwrite an audited administrator correction. Membership revoked while a device was offline needs an explicit server policy; do not silently route those captures to a different organization.
+| Request | Proposed outcome |
+| --- | --- |
+| First administrator for a new organization | Platform-approved administrator membership, after organization/ownership review |
+| Additional user joining an existing organization | Approved membership with explicit permissions, such as verification, project management or species management |
 
-### 7. Legacy transition and historical data
+An approved organization administrator can invite and manage later members. We still need to decide whether that administrator can also approve ordinary binding requests, or whether platform approval remains required.
 
-Require project UUIDs for new clients only after Android and the upload API support them. Older sessions and records with missing organization/project remain representable; do not fabricate assignments to satisfy a new constraint.
+```mermaid
+flowchart TD
+    A[User signs in with Keycloak] --> B[Request access to an organization]
+    B --> C[Authorized approver reviews request]
+    C --> D{Approved?}
+    D -->|No| E[Record rejection]
+    D -->|Yes| F[Record organization membership and permissions]
+    F --> G[User selects that organization]
+    G --> H[Check permission for the requested action]
+    H --> I[Check organization service entitlement if applicable]
+    I --> J[Allow the action only when both checks permit it]
+```
 
-A controlled migration may allocate an unambiguous legacy session to its known organization's configured default project, with provenance. If organization or project ownership is ambiguous, retain it for explicit allocation/reconciliation instead of guessing. Never select an arbitrary project just because the grower belongs to several projects.
+Keycloak remains responsible for login. Domain membership records the organization and permissions; Keycloak roles or claims can reflect that membership. One mutable `organization_id` claim must not be the only record of several memberships.
 
-Numeric Keycloak/mobile mappings resolve to `stakeholder.stakeholder.id`; they do not justify new `public.entity` ownership writes. Preserve capture/session UUIDs, historical references and reviewed ownership through the transition.
+The existing `org-admin-saas` role is a compatibility mechanism. In the target design, administration is scoped to a particular organization. Being an administrator of organization A must not make someone an administrator of organization B. Billing management may need its own permission.
 
-### Open policy and contract decisions before acceptance
+### 3. Keeping subscriptions separate
 
-* Unsubscribed/free/trial service allowances, duration, approval and upgrade requirements.
-* Quota exhaustion, cancellation/payment recovery and offline-upload behavior; whether previously collected data is accepted, held or restricted must be explicit.
-* Who verifies the first administrator, invitation expiry/acceptance, recovery and whether organizations approve their own ordinary membership requests.
-* Precise Android authorization/bootstrap and membership/project discovery API, including collectors recording for another grower and offline revocation handling.
-* Default-project replacement/archive behavior and the reviewed legacy backfill procedure.
-* Cross-organization session corrections and reconciliation of already processed data, billing counts and matching events.
+A subscription belongs to the organization, not to the email address of one administrator. Stripe metadata should link it to the Stakeholder UUID. Numeric IDs may remain as explicit compatibility mappings during migration.
 
-These are not resolved merely by merging the existing UI, schema or billing integration PRs.
+| Change | What it may affect | What it must preserve |
+| --- | --- | --- |
+| Upgrade or downgrade | Agreed service limits and features | Memberships and existing data ownership |
+| Payment failure or cancellation | Agreed restrictions or grace period | Login identity, memberships and historical sessions/captures |
+| New organization administrator | Who can manage the organization or billing | The organization's subscription identity |
 
-### Positive Consequences
+The backend must enforce the agreed service policy. A plan label, usage warning or `subscriber_*` role alone is insufficient. Exact free access, trial duration, grace periods and read-only restrictions remain open decisions.
 
-* Membership, payment and data ownership can evolve independently without accidental privilege escalation.
-* Multi-organization growers have an explicit collection context and retain one grower identity.
-* New organizations have a usable initial project, while historical data remains attributable.
-* UI, Android, services and BDDs can share one reviewable contract.
+### 4. Growers, organizations and projects
 
-### Negative Consequences
+A grower account is distinct from an admin-panel login. A grower may belong to several organizations and participate in several projects. Each project belongs to exactly one Stakeholder organization.
 
-* Requires coordinated Android, Stakeholder, identity/admin and Field Data service changes.
-* Offline caching, membership validation and downstream correction reconciliation add work.
-* Legacy clients need a staged migration; a universal non-null project constraint cannot be enabled immediately.
+```mermaid
+erDiagram
+    GROWER ||--o{ GROWER_ORGANIZATION : has
+    STAKEHOLDER_ORGANIZATION ||--o{ GROWER_ORGANIZATION : approves
+    STAKEHOLDER_ORGANIZATION ||--o{ PROJECT : owns
+    GROWER ||--o{ PROJECT_ENROLLMENT : has
+    PROJECT ||--o{ PROJECT_ENROLLMENT : includes
+    PROJECT ||--o{ COLLECTION_SESSION : owns
+    COLLECTION_SESSION ||--o{ CAPTURE : contains
+```
 
-## Pros and Cons of the Options
+This is a relationship diagram, not a proposal to rename existing tables. The existing `treetracker.grower_account_org` relationship already supports several organization associations; project enrollment uses the proposed `stakeholder.project_grower` relationship.
 
-### Option 1: One mutable organization attribute
+**Example:** Asha works on ESEA's nursery project on Monday and another organization's restoration project on Tuesday. She keeps one grower account. The two sessions belong to their respective projects and organizations.
 
-Simple for existing clients, but cannot express independent memberships and rewrites ownership semantics when a person moves. Rejected as the target model.
+A grower's home/primary organization may remain useful for contact or reporting. Changing it must not move Monday's captures to Tuesday's organization.
 
-### Option 2: Organization-only sessions
+### 5. Routing sessions and captures
 
-Supports multi-organization collection with fewer client changes, but cannot reliably identify a project when a grower has several enrollments or apply project-specific species/settings. Useful only as an explicit compatibility stage.
+After Android and the upload API support this design, every new session starts with one permitted project UUID. The backend derives the owning Stakeholder organization from that project and checks the grower's eligibility. Conflicting organization/project information must be rejected rather than guessed.
 
-### Option 3: Independent membership and project-owned sessions
+```mermaid
+flowchart TD
+    A[Grower opens Android app] --> B[Load or use cached approved organizations and projects]
+    B --> C[Select organization and project]
+    C --> D[Start session with project UUID]
+    D --> E[Collect captures online or offline]
+    E --> F[Upload session and captures]
+    F --> G[Backend checks project ownership and grower eligibility]
+    G --> H[Store session under the owning Stakeholder organization]
+    H --> I[Raw and verified captures preserve that context]
+```
 
-Supports the required organization/project boundaries and auditability. More implementation work, addressed through a default project and staged client migration.
+Android should receive only that grower's available organizations/projects, not the global project catalogue. If there is one permitted/default project, it can be selected automatically with a visible indication.
 
-## Implementation and acceptance evidence required
+* Switching collection project starts a new session.
+* Captures derive their project/organization context through the session; every table does not need another copied project field.
+* Upload retries must not overwrite an audited administrator correction.
+* Correcting a session requires the real actor, time, reason and previous/new allocation. Already verified captures, matching events, exports and usage must be reconciled consistently.
+* Revocation while a device was offline needs an explicit policy. The server must not silently reroute those captures elsewhere.
 
-* Membership onboarding/approval/rejection, least privilege and first-admin assignment tests.
-* Separate admin binding and grower QR enrollment scenarios; neither must silently perform the other.
-* Tests for two organizations and multiple projects, including one grower participating in both.
-* Tests that missing/expired subscriptions never change historical ownership or grant administrator roles; enforce the agreed entitlements separately.
-* Idempotent General-project creation, quota accounting, explicit empty species selection and controlled default replacement tests.
-* Android offline project selection, validated upload, ambiguous legacy upload, revoked membership and correction-safe retry tests.
-* Audited project/organization correction with downstream consistency and unchanged historical data on grower transfer.
+### 6. QR codes and older clients
 
-Add/refine the existing [domain BDD catalogue](https://github.com/SebastianGaertnersAI/treetracker-admin-client/tree/feat/domain-admin-views/features/domain) against the accepted rules. Its current manual specifications and linked unit tests do not establish that this cross-service proposal has been implemented end to end. Implementation work is tracked in #1316 above; no DB or Keycloak change is authorized by this document itself.
+The Share App QR identifies an invitation or collection context for an organization, optionally a project. It does not create admin permissions. The server resolves the invitation and applies the agreed membership rules.
 
-## Links
+Move toward Stakeholder UUIDs or server-resolved invitation tokens while retaining numeric `org_id` compatibility for existing Android/install-referrer links. Renaming the URL parameter alone does not migrate the flow.
 
-* Related identity proposals: [0013 Keycloak](0013-keycloak.md), [0014 permission organization](0014-treetracker-permission-organization.md). This proposal refines membership/ownership boundaries; it does not unilaterally supersede them.
-* Historical routing decision: [Field Data session organization bridge](https://github.com/Greenstand/treetracker-field-data/blob/main/docs/adr/0001-organization-by-session-bridge.md).
-* Existing UI/API integration: [admin client #1315](https://github.com/Greenstand/treetracker-admin-client/pull/1315), [admin API #699](https://github.com/Greenstand/treetracker-admin-api/pull/699).
-* Proposed project membership: [Stakeholder #49](https://github.com/Greenstand/treetracker-stakeholder-api/pull/49).
-* Proposed session project field and correction audit: [Field Data #121](https://github.com/Greenstand/treetracker-field-data/pull/121), [#122](https://github.com/Greenstand/treetracker-field-data/pull/122).
-* Proposed grower transfer history: [Treetracker API #165](https://github.com/Greenstand/treetracker-api/pull/165).
+Require project UUIDs only after both Android and the upload API support them. For older uploads:
+
+| Available information | Proposed handling |
+| --- | --- |
+| Known organization and an explicitly configured default project | A controlled migration may allocate the session to that project and record how it was assigned |
+| Missing or ambiguous organization/project | Keep the session for explicit allocation; do not invent ownership |
+| Grower belongs to several projects | Do not choose an arbitrary project from their memberships |
+
+Preserve existing UUIDs and historical references. Numeric mappings should resolve to `stakeholder.stakeholder.id`; they do not justify new ownership writes to `public.entity`.
+
+## What exists today and what still needs work
+
+| Area | Current evidence | Remaining change |
+| --- | --- | --- |
+| Admin binding | Approval sets numeric Keycloak `organization_id`, grants `org` and clears the request. A second organization request is blocked for an already-bound login | Audited NDM memberships, multiple approved admin memberships and explicit first-admin onboarding |
+| Member permissions | The integration treats `org-admin-saas` as admin; ordinary `org` members default to verification unless scoped grants override it | Agree and implement the full membership-scoped authorization model |
+| Billing | Tier display, hosted billing and usage warnings exist in the integration | Define and enforce free/trial/paid access and quota policies |
+| Grower memberships | Existing NDM association supports several organizations | Complete the grower enrollment and Android discovery experience |
+| Projects | Proposed project schema and admin assignment/correction workflows exist | Automatic General-project creation and agreed default replacement rules |
+| Session uploads | Android sends an organization string; the current Field Data POST schema does not accept a project UUID | Versioned project selection/upload and safe older-client handling |
+| QR invitations | Current links forward `org_id` and `org_name` into Android | Stakeholder-based invitation resolution and membership handling |
+
+## Decisions still needed before acceptance
+
+| Topic | Question to settle |
+| --- | --- |
+| Free/trial access | What may an unsubscribed organization do, for how long and within which limits? |
+| Payment and quota changes | What is restricted, and what happens to data already collected offline? |
+| Approvals and recovery | Who verifies the first administrator, approves later members and recovers lost administration access? |
+| Invitations | How do invitation acceptance, expiry and project restrictions work? |
+| Android identity and offline use | How are memberships/projects discovered, and how are collectors recording for another grower handled? |
+| Default projects and old data | How is a default replaced, and which legacy sessions may be assigned automatically? |
+| Allocation corrections | Who may move sessions across organizations, and how are processed records reconciled? |
+
+## Consequences
+
+**Benefits:** clearer permissions, one grower identity across organizations, stable historical ownership and a simple first project for new organizations.
+
+**Costs:** coordinated changes across Android, Stakeholder, identity/admin and Field Data; offline membership handling; and a staged migration for older clients. Existing UI or schema PRs alone do not complete this design.
+
+## Links and supporting evidence
+
+### Existing decisions and use cases
+
+* [0013: Keycloak](0013-keycloak.md) and [0014: permission organization](0014-treetracker-permission-organization.md). This proposal refines membership and ownership; it does not unilaterally supersede those proposals.
+* [Admin binding scenario #1266](https://github.com/Greenstand/treetracker-admin-client/issues/1266): an admin-panel user requests membership and receives Verify access after approval.
+* [Subscription scenario #1261](https://github.com/Greenstand/treetracker-admin-client/issues/1261): an existing organization upgrades to premium.
+* [Accepted session-organization bridge ADR, March 2022](https://github.com/Greenstand/treetracker-field-data/blob/main/docs/adr/0001-organization-by-session-bridge.md): explicitly anticipates growers collecting for several organizations. It describes a historical bridge, not a completed current rollout.
+* [Grower organization association](https://github.com/Greenstand/treetracker-api/blob/main/database/migrations/sqls/20220321204145-grower-account-organization-up.sql).
+* [Android SessionRequest](https://github.com/Greenstand/treetracker-android/blob/master/app/src/main/java/org/greenstand/android/TreeTracker/api/models/requests/SessionRequest.kt) and [Field Data session schema](https://github.com/Greenstand/treetracker-field-data/blob/main/server/handlers/sessionHandler/schemas.js).
+
+### Related implementation proposals
+
+* [Admin client #1315](https://github.com/Greenstand/treetracker-admin-client/pull/1315) and [admin API #699](https://github.com/Greenstand/treetracker-admin-api/pull/699).
+* [Stakeholder projects and membership #49](https://github.com/Greenstand/treetracker-stakeholder-api/pull/49).
+* [Field Data session project #121](https://github.com/Greenstand/treetracker-field-data/pull/121) and [correction audit #122](https://github.com/Greenstand/treetracker-field-data/pull/122).
+* [Grower transfer history #165](https://github.com/Greenstand/treetracker-api/pull/165).
