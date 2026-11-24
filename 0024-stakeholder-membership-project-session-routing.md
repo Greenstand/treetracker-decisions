@@ -67,7 +67,7 @@ The General project:
 * Can be renamed without changing its UUID.
 * Starts with an empty species selection, like other new projects. An authorized user can allocate species or explicitly choose organization/default inheritance.
 
-Creating a project does not itself authorize collection under a free plan. **Free/trial service access and quotas still need a policy decision.** Replacing or archiving the default project also needs an agreed rule; it must not change historical session references.
+Creating a project does not itself authorize collection under a free plan. **Free/trial service access and quotas still need a policy decision. (3 months trial up to 500 captures is proposed here)** Replacing or archiving the default project also needs an agreed rule; it must not change historical session references.
 
 ### 2. Giving people admin-panel access
 
